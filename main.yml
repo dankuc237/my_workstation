@@ -1,0 +1,240 @@
+# https://gitlab.au.dk/ansible/ansible_howto
+
+# INSTALACJA ANSIBLE
+# sudo pip3 install ansible
+# 
+# UŻYCIE SKRYPTU
+# sudo whoami
+# ansible-playbook main.yml
+
+---
+- name: Instalacja narzędzi z Kali Linux
+  hosts: localhost
+  become: yes  # Użyj uprawnień administratora (sudo)
+
+  tasks:
+    - name: Update apt db
+      apt:
+        update_cache: yes
+
+# install_kali_everythink_package
+#    - name: Zainstaluj metapaczkę ze wszystkimi narzędziami kali
+#      apt:
+#        name: kali-linux-everything
+#        state: present
+
+# unpack_rockyou
+    - name: Rozpakuj rockyou.txt.gz jeśli jeszcze nie rozpakowane
+      ansible.builtin.command: gunzip -kf /usr/share/wordlists/rockyou.txt.gz
+#        creates: /usr/share/wordlists/rockyou.txt
+
+######################## VSCODIUM ########################
+    - name: Sprawdź czy klucz GPG dla VSCodium jest pobrany
+      ansible.builtin.stat:
+        path: /usr/share/keyrings/vscodium-archive-keyring.gpg
+      register: gpg_key_stat
+
+    - name: Pobierz i zainstaluj klucz GPG dla VSCodium
+      ansible.builtin.shell: |
+        wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg \
+        | gpg --dearmor \
+        | sudo dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
+      args:
+        executable: /bin/bash
+      when: gpg_key_stat.stat.exists == False
+
+    - name: Sprawdź czy repozytorium VSCodium jest dodane
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/vscodium.list
+      register: vscodium_repo_stat
+
+    - name: Dodaj VSCodium repo
+      ansible.builtin.shell: |
+        echo 'deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' \
+        | sudo tee /etc/apt/sources.list.d/vscodium.list
+      args:
+        executable: /bin/bash
+      when: vscodium_repo_stat.stat.exists == False
+
+    - name: Update apt db
+      apt:
+        update_cache: yes
+
+    - name: Zainstaluj VSCodium
+      apt:
+        name: codium
+        state: present
+# zainstaluj dodatki
+# code --list-extensions # lista dodatków w vscodium
+    - name: Sprawdź aktualnie zainstalowane rozszerzenia dla VSCodium
+      become_user: kali
+      ansible.builtin.shell: "codium --list-extensions"
+      register: installed_extensions
+
+    - name: Zainstaluj brakujące rozszerzenia w VSCodium
+      become_user: kali
+      ansible.builtin.shell: "codium --install-extension {{ item }}"
+      loop:
+        - abusaidm.html-snippets
+        - bierner.markdown-mermaid
+        - esbenp.prettier-vscode
+        - foam.foam-vscode
+        - formulahendry.auto-rename-tag
+        - KevinRose.vsc-python-indent
+        - lonefy.vscode-JS-CSS-HTML-formatter
+        - mhutchie.git-graph
+        - ms-python.python
+        - mushan.vscode-paste-image
+        - robole.markdown-snippets
+        - yzhang.markdown-all-in-one
+      when: "'{{ item }}' not in installed_extensions.stdout"
+
+# Odinstaluj Code OSS
+    - name: Odinstaluj Code OSS
+      ansible.builtin.package:
+        name: code-oss
+        state: absent
+
+######################## DODATKOWE PROGRAMY ########################
+    - name: Zainstaluj jq (commandline JSON processor)
+      apt:
+        name: jq
+        state: present
+
+    - name: Zainstaluj sshfs (Mount Remote File Systems Over SSH)
+      apt:
+        name: sshfs
+        state: present
+
+    - name: Zainstaluj LibreOffice
+      apt:
+        name: libreoffice
+        state: present
+
+    - name: Zainstaluj Flameshot (screenshot)
+      apt:
+        name: flameshot
+        state: present
+
+######################## DODATKOWE BINARKI ########################
+# pobierz binarki ligolo-ng z GH
+    - name: Pobierz dostepne zasoby ligolo-ng 
+      uri:                                                               
+        url: https://api.github.com/repos/nicocha30/ligolo-ng/releases/latest
+        return_content: true                                             
+      register: json_response
+
+    - name: Utwórz katalogi do rozpakowania wersji ligolo-ng
+      file:
+        path: "/usr/share/ligolo-ng/{{ item.name | regex_replace('(.zip|.tar.gz)$', '') }}"
+        state: directory
+      loop: "{{ json_response.json.assets }}"
+      when: not item.name.endswith('.txt')
+      no_log: true
+
+    - name: Pobierz ligolo-ng
+      ansible.builtin.unarchive:
+        src: "{{ item.browser_download_url }}"                      
+        dest: "/usr/share/ligolo-ng/{{ item.name | regex_replace('(.zip|.tar.gz)$', '') }}"
+        remote_src: true
+      loop: "{{ json_response.json.assets }}"
+      when: not item.name.endswith('.txt') 
+      no_log: true
+
+    - name: Utwórz symlink do ligolo-ng
+      file:
+        src: /usr/share/ligolo-ng
+        dest: /home/kali/Desktop/ligolo-ng
+        state: link
+
+# pobierz binarki pspy z GH
+    - name: Pobierz dostepne zasoby pspy
+      uri:                                                               
+        url: https://api.github.com/repos/DominicBreuker/pspy/releases/latest
+        return_content: true                                             
+      register: json_response
+
+    - name: Utwórz katalogi dla rozpakowania pspy
+      file:
+        path: "/usr/share/pspy"
+        state: directory
+
+    - name: Pobierz pspy
+      get_url:
+        url: "{{ item.browser_download_url }}"                      
+        dest: "/usr/share/pspy/{{ item.name }}"
+      loop: "{{ json_response.json.assets }}"
+      no_log: true
+
+    - name: Utwórz symlink do pspy
+      file:
+        src: /usr/share/pspy
+        dest: /home/kali/Desktop/pspy
+        state: link
+
+######################## NOTATKI ########################
+
+# pobierz_PayloadsAllTheThings
+# payloadsallthethings - /usr/share/payloadsallthethings
+    - name: Sprawdź, czy istnieje repozytorium Payloadsallthethings
+      stat:
+        path: /usr/share/payloadsallthethings
+      register: dir_payloads
+
+    - name: Utwórz symlink, jeśli repozytorium Payloadsallthethings istnieje
+      file:
+        src: /usr/share/payloadsallthethings
+        dest: /home/kali/Desktop/payloadsallthethings
+        state: link
+      when: dir_payloads.stat.exists
+
+    - name: Sklonuj PayloadsAllTheThings, jeśli repozytorium nie istnieje lokalnie
+      ansible.builtin.git:
+        repo: https://github.com/swisskyrepo/PayloadsAllTheThings.git
+        dest: /home/kali/Desktop/payloadsallthethings
+      when: not dir_payloads.stat.exists
+
+# Hacktrix
+    - name: Sklonuj hacktricks
+      ansible.builtin.git:
+        repo: https://github.com/carlospolop/hacktricks.git
+        dest: "/home/kali/Desktop/hacktricks"
+
+
+# pobierz_WSTG
+    - name: Sklonuj OWASP WSTG
+      ansible.builtin.git:
+        repo: https://github.com/OWASP/wstg.git
+        dest: "/home/kali/Desktop/WSTG"
+
+    - name: Pobierz plik WSTG-V4.2.pdf na pulpit
+      ansible.builtin.get_url:
+        url: "https://rnpg.ir/Documents/WSTG-V4.2.pdf"
+        dest: "/home/kali/Desktop/WSTG-V4.2.pdf"
+######################## PRZEGLĄDARKI Z DODATKAMI ########################
+# install_chromium
+    - name: Zainstaluj Chromium
+      apt:
+        name: chromium
+        state: present
+# install_firefox
+    - name: Zainstaluj Firefox
+      apt:
+        name: firefox-esr
+        state: present
+# zainstaluj dodatki do firefox
+    - name: Ręczna instalacja dodatków do FireFox
+      ansible.builtin.command: >
+        firefox \
+            -new-tab "https://google.com" \
+            -new-tab "https://addons.mozilla.org/firefox/downloads/latest/List-all-cookies" \
+            -new-tab "https://addons.mozilla.org/firefox/downloads/latest/foxyproxy-standard" \
+            -new-tab "https://addons.mozilla.org/firefox/downloads/latest/wappalyzer/" \
+            -new-tab "https://addons.mozilla.org/firefox/downloads/latest/adblocker-ultimate"
+      become_user: kali
+
+
+# remove_burp
+# download_burp_premium
+# set_panel
+# Shrek_i_love
