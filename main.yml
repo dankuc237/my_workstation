@@ -200,7 +200,6 @@
         repo: https://github.com/carlospolop/hacktricks.git
         dest: "/home/kali/Desktop/hacktricks"
 
-
 # pobierz_WSTG
     - name: Sklonuj OWASP WSTG
       ansible.builtin.git:
@@ -211,6 +210,12 @@
       ansible.builtin.get_url:
         url: "https://rnpg.ir/Documents/WSTG-V4.2.pdf"
         dest: "/home/kali/Desktop/WSTG-V4.2.pdf"
+
+# Orange-Cyberdefense/ocd-mindmaps
+    - name: Sklonuj Orange-Cyberdefense/ocd-mindmaps
+      ansible.builtin.git:
+        repo: https://github.com/Orange-Cyberdefense/ocd-mindmaps.git
+        dest: "/home/kali/Desktop/Orange-Cyberdefense_ocd-mindmaps"
 ######################## PRZEGLĄDARKI Z DODATKAMI ########################
 # install_chromium
     - name: Zainstaluj Chromium
