@@ -1,0 +1,32 @@
+---
+- name: Ustawianie tła w środowisku XFCE4 na Kali Linux
+  hosts: localhost
+  become: yes  # To umożliwia Ansible uruchomienie poleceń z uprawnieniami roota
+
+  tasks:
+    - name: Copy wallpaper file
+      copy:
+        src: peakpx.jpg
+        dest: /usr/share/backgrounds/peakpx.jpg
+        #owner: root
+        #group: root
+      #when: ansible_distribution == "Debian"
+   
+   
+    - name: Pobierz wszystkie właściwości w kanale xfconf-query
+      community.general.xfconf:
+        channel: xfce4-desktop  # Zastąp kanałem, z którego chcesz pobrać właściwości
+      register: xfconf_properties
+
+    - name: Wyświetl wszystkie właściwości
+      ansible.builtin.debug:
+        var: xfconf_properties.properties
+#    - name: Ustaw nową ścieżkę do tła pulpitu w XFCE4
+#      community.general.xfconf:
+#        channel: xfce4-desktop
+#        property: /backdrop/screen0/monitor0/image-path
+#        value_type: string
+#        value: ["/home/kali/Desktop/kaliworkstation/roles/peakpx.jpg"] # Ścieżka do pliku graficznego jako tło
+#
+#    - name: Restartuj menedżer pulpitu XFCE4 (xfdesktop)
+#      ansible.builtin.command: xfdesktop --reload

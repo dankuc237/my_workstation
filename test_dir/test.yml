@@ -1,0 +1,6 @@
+---
+- name: Instalacja narzędzi z Kali Linux
+  hosts: localhost
+  become: yes  # Użyj uprawnień administratora (sudo)
+
+  tasks:
