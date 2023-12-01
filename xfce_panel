@@ -1,0 +1,12 @@
+# list all panel properties
+xfconf-query -c xfce4-panel -p /panels -lv
+
+# list panel IDs
+xfconf-query -c xfce4-panel -p /panels | grep -v "Value is an\|^$"
+
+# list all panel plugins info (going to model after existing launcher plugin)
+xfconf-query -c xfce4-panel -p /plugins -lv
+
+
+
+

@@ -4,3 +4,16 @@
   become: yes  # Użyj uprawnień administratora (sudo)
 
   tasks:
+    - name: Sprawdź istnienie katalogu /usr/share/wordlists/Assetnote
+      stat:
+        path: /usr/share/wordlists/Assetnote
+      register: directory_check
+    - name: Utwórz katalog /usr/share/wordlists/Assetnote jeśli nie istnieje
+      file:
+        path: /usr/share/wordlists/Assetnote
+        state: directory
+      when: not directory_check.stat.exists      
+    - name: Pobierz wordlisty Assetnote [https://wordlists.assetnote.io/] 
+      command: "wget -r --no-parent -R 'index.html*' https://wordlists-cdn.assetnote.io/data/ -nH -e robots=off"
+      args:
+        chdir: "/usr/share/wordlists/Assetnote"

@@ -1,5 +1,6 @@
 # https://gitlab.au.dk/ansible/ansible_howto
 
+# wymagany user "kali"
 # INSTALACJA ANSIBLE
 # sudo pip3 install ansible
 # 
@@ -216,6 +217,7 @@
       ansible.builtin.git:
         repo: https://github.com/Orange-Cyberdefense/ocd-mindmaps.git
         dest: "/home/kali/Desktop/Orange-Cyberdefense_ocd-mindmaps"
+
 ######################## PRZEGLĄDARKI Z DODATKAMI ########################
 # install_chromium
     - name: Zainstaluj Chromium
