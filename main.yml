@@ -102,7 +102,7 @@
         name: jq
         state: present
 
-    - name: Zainstaluj sshfs (Mount Remote File Systems Over SSH)
+    - name: Zainstaluj sshfs (mount remote file systems over SSH)
       apt:
         name: sshfs
         state: present
@@ -244,4 +244,5 @@
 # remove_burp
 # download_burp_premium
 # set_panel
+# https://forum.xfce.org/viewtopic.php?id=8619
 # Shrek_i_love
