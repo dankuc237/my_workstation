@@ -105,7 +105,12 @@
     - name: Pobranie pluginów Joplin - Outline
       get_url:
         url: https://github.com/joplin/plugins/raw/master/plugins/outline/plugin.jpl
-        dest: /home/kali/.config/joplin-desktop/plugins/plugin.jpl
+        dest: /home/kali/.config/joplin-desktop/plugins/outline.jpl
+        
+    - name: Pobranie pluginów Joplin - Search & Replace
+      get_url:
+        url: https://github.com/joplin/plugins/raw/master/plugins/joplin-plugin-search-and-replace/plugin.jpl
+        dest: /home/kali/.config/joplin-desktop/plugins/joplin-plugin-search-and-replace.jpl
 
 ######################## DODATKOWE PROGRAMY ########################
     - name: Zainstaluj jq (commandline JSON processor)
