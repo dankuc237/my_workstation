@@ -96,6 +96,17 @@
         name: code-oss
         state: absent
 
+######################## DODATKI JOPLIN PROGRAMY ########################
+    - name: Utworzenie folderu na pluginy dla Joplin
+      file:
+        path: /home/kali/.config/joplin-desktop/plugins
+        state: directory
+
+    - name: Pobranie pluginów Joplin - Outline
+      get_url:
+        url: https://github.com/joplin/plugins/raw/master/plugins/outline/plugin.jpl
+        dest: /home/kali/.config/joplin-desktop/plugins/plugin.jpl
+
 ######################## DODATKOWE PROGRAMY ########################
     - name: Zainstaluj jq (commandline JSON processor)
       apt:
