@@ -112,6 +112,15 @@
         url: https://github.com/joplin/plugins/raw/master/plugins/joplin-plugin-search-and-replace/plugin.jpl
         dest: /home/kali/.config/joplin-desktop/plugins/joplin-plugin-search-and-replace.jpl
 
+######################## KONFIGURACJA TMUX ########################
+    - name: Download .tmux.conf file from GitHub
+      get_url:
+        url: "https://raw.githubusercontent.com/dankuc237/my_tmux_config/main/.tmux.conf"
+        dest: "/home/kali/.tmux.conf"
+        mode: "0644"
+        owner: "kali"
+        group: "kali"
+
 ######################## DODATKOWE PROGRAMY ########################
     - name: Zainstaluj jq (commandline JSON processor)
       apt:
