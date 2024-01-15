@@ -121,6 +121,32 @@
         owner: "kali"
         group: "kali"
 
+    - name: Install fzf
+      apt:
+        name: fzf
+        state: present
+
+# pobierz cheat do folderu
+    - name: Create target directory
+      file:
+        path: /usr/share/tmux
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Clone my_tmux_config repository
+      ansible.builtin.git:
+        repo: https://github.com/dankuc237/my_tmux_config.git
+        dest: /usr/share/tmux/my_tmux_config
+
+    - name: Set proper permissions
+      file:
+        path: /usr/share/tmux/my_tmux_config
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
 ######################## DODATKOWE PROGRAMY ########################
     - name: Zainstaluj jq (commandline JSON processor)
       apt:
