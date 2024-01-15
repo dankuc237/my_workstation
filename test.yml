@@ -1,0 +1,45 @@
+---
+- name: Instalacja narzędzi z Kali Linux
+  hosts: localhost
+  become: yes  # Użyj uprawnień administratora (sudo)
+  tasks:
+######################## KONFIGURACJA TMUX ########################
+    - name: Download .tmux.conf file from GitHub
+      get_url:
+        url: "https://raw.githubusercontent.com/dankuc237/my_tmux_config/main/.tmux.conf"
+        dest: "/home/kali/.tmux.conf"
+        mode: "0644"
+        owner: "kali"
+        group: "kali"
+
+    - name: Install fzf
+      apt:
+        name: fzf
+        state: present
+
+# pobierz cheat do folderu
+    - name: Create target directory
+      file:
+        path: /usr/share/tmux
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Clone my_tmux_config repository
+      ansible.builtin.git:
+        repo: https://github.com/dankuc237/my_tmux_config.git
+        dest: /usr/share/tmux/
+
+    - name: Set proper permissions
+      file:
+        path: /usr/share/tmux/
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Set chmod 755 for /usr/share/tmux/helper.sh
+      ansible.builtin.file:
+        path: /usr/share/tmux/helper.sh
+        mode: '0755'
