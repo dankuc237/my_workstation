@@ -7,7 +7,6 @@
 # UŻYCIE SKRYPTU
 # sudo whoami
 # ansible-playbook main.yml
-# asd
 ---
 - name: Instalacja narzędzi z Kali Linux
   hosts: localhost
